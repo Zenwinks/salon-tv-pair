@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; connect-src https://ntfy.sh; base-uri 'none'; form-action 'none'">
+  <title>Salon TV – envoyer ma liste</title>
+  <style>
+    :root { color-scheme: dark; --bg: #0b0e14; --panel: #131826; --field: #1b2234; --text: #e8ecf4; --muted: #8b94a7; --accent: #4f8cff; --danger: #ff6b6b; --ok: #30a46c; }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 20px 16px 40px; background: var(--bg); color: var(--text); font: 17px/1.45 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+    main { max-width: 520px; margin: 0 auto; }
+    h1 { margin: 8px 0 4px; font-size: 28px; }
+    p { margin: 0 0 16px; }
+    .muted { color: var(--muted); font-size: 15px; }
+    form { padding: 20px; background: var(--panel); border-radius: 16px; }
+    fieldset { margin: 0 0 16px; padding: 0; border: 0; }
+    .seg { display: flex; }
+    .seg label { flex: 1; padding: 12px; text-align: center; background: var(--field); border: 2px solid transparent; }
+    .seg label:first-child { border-radius: 10px 0 0 10px; }
+    .seg label:last-child { border-radius: 0 10px 10px 0; }
+    .seg input { position: absolute; opacity: 0; }
+    .seg input:checked + span { color: var(--accent); font-weight: 600; }
+    .seg label:has(input:checked) { border-color: var(--accent); }
+    .field { display: block; margin-bottom: 14px; }
+    .field > span { display: block; margin-bottom: 6px; color: var(--muted); font-size: 14px; }
+    input[type=text], input[type=url], input[type=password], select { width: 100%; padding: 14px; font: inherit; color: var(--text); background: var(--field); border: 2px solid transparent; border-radius: 10px; }
+    input:focus, select:focus { outline: none; border-color: var(--accent); }
+    .check { display: flex; align-items: center; margin: -4px 0 16px; color: var(--muted); font-size: 15px; }
+    .check input { width: 20px; height: 20px; margin: 0 8px 0 0; }
+    button { width: 100%; padding: 16px; font: inherit; font-weight: 600; color: #fff; background: var(--accent); border: 0; border-radius: 12px; }
+    button:disabled { opacity: .6; }
+    [hidden] { display: none !important; }
+    #result { margin-top: 16px; }
+    .error { color: var(--danger); }
+    .done { padding: 20px; background: var(--panel); border-radius: 16px; }
+    .done strong { color: var(--ok); }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Salon TV</h1>
+    <p id="intro" class="muted">Envoie ta liste IPTV à ta TV. Les informations sont chiffrées sur ce téléphone : seule ta TV peut les lire.</p>
+
+    <p id="invalid" class="error" hidden>Ce lien est incomplet. Scanne le QR code affiché sur ta TV avec l’appareil photo du téléphone.</p>
+
+    <form id="form" hidden novalidate autocomplete="off">
+      <fieldset>
+        <div class="seg">
+          <label><input type="radio" name="kind" value="m3u" checked><span>Lien M3U</span></label>
+          <label><input type="radio" name="kind" value="xtream"><span>Xtream Codes</span></label>
+        </div>
+      </fieldset>
+
+      <div id="m3u-fields">
+        <label class="field"><span>Adresse de la playlist</span>
+          <input id="m3u-url" type="url" inputmode="url" placeholder="http://…" autocapitalize="off" autocorrect="off" spellcheck="false"></label>
+      </div>
+
+      <div id="xtream-fields" hidden>
+        <label class="field"><span>Serveur</span>
+          <input id="xt-server" type="text" inputmode="url" placeholder="http://exemple.tv:8080" autocapitalize="off" autocorrect="off" spellcheck="false"></label>
+        <label class="field"><span>Nom d’utilisateur</span>
+          <input id="xt-user" type="text" autocapitalize="off" autocorrect="off" spellcheck="false"></label>
+        <label class="field"><span>Mot de passe</span>
+          <input id="xt-pass" type="password" autocapitalize="off" autocorrect="off" spellcheck="false"></label>
+        <label class="check"><input id="show-pass" type="checkbox">Afficher le mot de passe</label>
+        <label class="field"><span>Format des flux</span>
+          <select id="xt-format"><option value="m3u8">HLS (.m3u8)</option><option value="ts">MPEG-TS (.ts)</option></select></label>
+      </div>
+
+      <button id="send" type="submit">Envoyer à la TV</button>
+      <p id="result" role="status"></p>
+    </form>
+
+    <div id="done" class="done" hidden>
+      <p><strong>Envoyé.</strong> Regarde ta TV : les chaînes se chargent.</p>
+      <p class="muted">Si rien ne se passe, ou si la TV affiche une erreur, scanne le nouveau QR code qui s’y affiche.</p>
+    </div>
+
+    <p class="muted">Ne scanne que le QR code de ta propre TV : ce qui est saisi ici est destiné à l’appareil qui affiche ce code.</p>
+  </main>
+  <script src="pair.js"></script>
+</body>
+</html>
